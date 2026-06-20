@@ -12,6 +12,9 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
+import { NigeriaCoatOfArms } from './NigeriaCoatOfArms';
+import { AbujaSkyline } from './AbujaSkyline';
+
 
 interface OverlayUIProps {
   currentX: number;
@@ -29,6 +32,8 @@ interface OverlayUIProps {
   onSetMenuOpen: (open: boolean) => void;
   isStarted: boolean;
   onStart: () => void;
+  viewMode: '3d' | '2d';
+  onToggleViewMode: (mode: '3d' | '2d') => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({
@@ -46,7 +51,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   isMenuOpen,
   onSetMenuOpen,
   isStarted,
-  onStart
+  onStart,
+  viewMode,
+  onToggleViewMode
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -140,38 +147,74 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   if (!isStarted) {
     return (
       <div className="landing-screen">
+        <div className="flag-ribbon-left"></div>
+        <div className="flag-ribbon-right"></div>
         <div className="landing-backdrop"></div>
+        <AbujaSkyline opacity={0.35} />
+
         <div className="landing-card">
+          <div className="coat-of-arms-container">
+            <NigeriaCoatOfArms width={130} height={130} />
+          </div>
+
           <header className="landing-header">
             <span className="subtitle-badge">NIGERIA HISTORICAL ARCHIVE</span>
             <h1>Nigeria Leadership</h1>
-            <h2 className="title-highlight">3D Interactive Museum</h2>
+            <h2 className="title-highlight">Chronological Digital Museum</h2>
             <p className="landing-desc">
-              Embark on an immersive, web-based chronological walkthrough of Nigeria's leadership history. 
+              Embark on an immersive chronological walkthrough of Nigeria's leadership history. 
               Explore detailed biographies and achievements from the colonial governance era up to present-day democracy, 
-              rendered dynamically in real-time Caravaggio-style physical lighting environments.
+              rendered beautifully with rich national symbols.
             </p>
           </header>
 
-          <section className="settings-panel-landing">
-            <h3>EXHIBITION RENDERING QUALITY</h3>
-            <div className="quality-presets">
-              {(['low', 'medium', 'high'] as GraphicsQuality[]).map((q) => (
-                <button
-                  key={q}
-                  className={`preset-btn ${graphicsQuality === q ? 'active' : ''}`}
-                  onClick={() => onSetGraphicsQuality(q)}
-                >
-                  <span className="preset-name">{q.toUpperCase()}</span>
-                  <span className="preset-sub">
-                    {q === 'low' && 'Max FPS / No Postprocessing / No Shadows'}
-                    {q === 'medium' && 'Balanced / Standard Bloom / Shadow Maps'}
-                    {q === 'high' && 'Cinematic / Depth of Field / Bloom / Reflections'}
-                  </span>
-                </button>
-              ))}
+          <section className="view-mode-selector-landing">
+            <h3>SELECT EXHIBITION MODE</h3>
+            <div className="view-choices-grid">
+              <button
+                className={`view-choice-btn ${viewMode === '3d' ? 'active gold-active' : ''}`}
+                onClick={() => onToggleViewMode('3d')}
+              >
+                <span className="view-title">
+                  <Sparkles size={14} className={viewMode === '3d' ? 'icon-pulse' : ''} style={{ color: '#d4af37' }} />
+                  3D Immersive Room
+                </span>
+                <span className="view-sub">Explore a 3D gallery hall with dynamic lighting & frame meshes</span>
+              </button>
+              <button
+                className={`view-choice-btn ${viewMode === '2d' ? 'active' : ''}`}
+                onClick={() => onToggleViewMode('2d')}
+              >
+                <span className="view-title">
+                  <Sparkles size={14} style={{ color: '#10b981' }} />
+                  2D Digital Gallery
+                </span>
+                <span className="view-sub">Browse catalog lists & cards, optimized for speed & accessibility</span>
+              </button>
             </div>
           </section>
+
+          {viewMode === '3d' && (
+            <section className="settings-panel-landing">
+              <h3>EXHIBITION RENDERING QUALITY</h3>
+              <div className="quality-presets">
+                {(['low', 'medium', 'high'] as GraphicsQuality[]).map((q) => (
+                  <button
+                    key={q}
+                    className={`preset-btn ${graphicsQuality === q ? 'active' : ''}`}
+                    onClick={() => onSetGraphicsQuality(q)}
+                  >
+                    <span className="preset-name">{q.toUpperCase()}</span>
+                    <span className="preset-sub">
+                      {q === 'low' && 'Max FPS / No Postprocessing / No Shadows'}
+                      {q === 'medium' && 'Balanced / Standard Bloom / Shadow Maps'}
+                      {q === 'high' && 'Cinematic / Depth of Field / Bloom / Reflections'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           <button className="start-btn" onClick={onStart}>
             <Sparkles className="icon-pulse" size={20} />
@@ -179,7 +222,12 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
           </button>
         </div>
         <div className="landing-footer">
-          <p>Clicking enters fullscreen mode automatically. Use SCROLL wheel or drag SCRUBBER to traverse time. Press ESC to configure settings.</p>
+          <p>
+            {viewMode === '3d'
+              ? 'Clicking enters fullscreen mode automatically. Use SCROLL wheel or drag SCRUBBER to traverse time. Press ESC to configure settings.'
+              : 'Explore the full timeline database of Nigeria\'s leaders, with search filters and Wikipedia records.'
+            }
+          </p>
         </div>
       </div>
     );
@@ -188,19 +236,39 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   return (
     <div className={`hud-container ${mouseInactive ? 'hud-hidden' : ''}`}>
       {/* 1. TOP-LEFT: ERA TITLE HUD */}
-      <header className="hud-era-panel">
-        <div className="era-dot" style={{ backgroundColor: currentEra.color }}></div>
-        <div className="era-text-group">
-          <span className="era-label">CURRENT EXHBIT ERA</span>
-          <h2 style={{ textShadow: `0 0 10px ${currentEra.color}30` }}>
-            {currentEra.name.toUpperCase()}
-          </h2>
-          <span className="era-years">({currentEra.startYear} – {currentEra.endYear})</span>
-        </div>
-      </header>
+      {viewMode === '3d' && (
+        <header className="hud-era-panel">
+          <div className="era-dot" style={{ backgroundColor: currentEra.color }}></div>
+          <div className="era-text-group">
+            <span className="era-label">CURRENT EXHBIT ERA</span>
+            <h2 style={{ textShadow: `0 0 10px ${currentEra.color}30` }}>
+              {currentEra.name.toUpperCase()}
+            </h2>
+            <span className="era-years">({currentEra.startYear} – {currentEra.endYear})</span>
+          </div>
+        </header>
+      )}
 
       {/* 2. TOP-RIGHT: CONTROLS & SEARCH */}
       <div className="hud-controls">
+        {/* Toggle Mode */}
+        <div className="hud-view-toggle">
+          <button
+            className={`hud-toggle-btn ${viewMode === '3d' ? 'active' : ''}`}
+            onClick={() => onToggleViewMode('3d')}
+            title="Switch to 3D room"
+          >
+            3D Room
+          </button>
+          <button
+            className={`hud-toggle-btn ${viewMode === '2d' ? 'active' : ''}`}
+            onClick={() => onToggleViewMode('2d')}
+            title="Switch to 2D timeline"
+          >
+            2D Gallery
+          </button>
+        </div>
+
         {/* Search Engine */}
         <div className="hud-search-wrapper" ref={searchRef}>
           <div className="search-bar">
@@ -257,20 +325,23 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
 
           {showSettingsDropdown && (
             <div className="hud-settings-dropdown">
-              <h4>GRAPHICS PRESET</h4>
-              <div className="settings-option-grid">
-                {(['low', 'medium', 'high'] as GraphicsQuality[]).map((q) => (
-                  <button
-                    key={q}
-                    className={`quality-choice-btn ${graphicsQuality === q ? 'active' : ''}`}
-                    onClick={() => onSetGraphicsQuality(q)}
-                  >
-                    {q.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              
-              <hr className="menu-divider" />
+              {viewMode === '3d' && (
+                <>
+                  <h4>GRAPHICS PRESET</h4>
+                  <div className="settings-option-grid">
+                    {(['low', 'medium', 'high'] as GraphicsQuality[]).map((q) => (
+                      <button
+                        key={q}
+                        className={`quality-choice-btn ${graphicsQuality === q ? 'active' : ''}`}
+                        onClick={() => onSetGraphicsQuality(q)}
+                      >
+                        {q.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                  <hr className="menu-divider" />
+                </>
+              )}
               
               <div className="sound-setting-row" onClick={onToggleMusic}>
                 <span>Ambient Soundtrack</span>
@@ -287,34 +358,36 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
       </div>
 
       {/* 3. BOTTOM: SCRUBBER BAR */}
-      <footer className={`hud-bottom-scrubber ${mode !== 'timeline' ? 'scrubber-locked' : ''}`}>
-        <div className="scrub-labels">
-          <span>COLONIAL</span>
-          <span>INDEPENDENCE</span>
-          <span>MILITARY</span>
-          <span>DEMOCRATIC</span>
-        </div>
-        
-        <div className="scrubber-bar-track" onClick={handleScrubberAction}>
-          {/* Era Segments Background Glow */}
-          <div className="era-segment-bg" style={{ left: '0%', width: '27%', backgroundColor: '#b453091e' }}></div>
-          <div className="era-segment-bg" style={{ left: '27%', width: '13%', backgroundColor: '#0478571e' }}></div>
-          <div className="era-segment-bg" style={{ left: '40%', width: '33%', backgroundColor: '#4b55631e' }}></div>
-          <div className="era-segment-bg" style={{ left: '73%', width: '27%', backgroundColor: '#0284c71e' }}></div>
-
-          {/* Scrubber Knob */}
-          <div
-            className="scrubber-knob"
-            style={{ left: `${(currentX / 575) * 100}%` }}
-          >
-            <div className="knob-pulse" style={{ backgroundColor: currentEra.color }}></div>
+      {viewMode === '3d' && (
+        <footer className={`hud-bottom-scrubber ${mode !== 'timeline' ? 'scrubber-locked' : ''}`}>
+          <div className="scrub-labels">
+            <span>COLONIAL</span>
+            <span>INDEPENDENCE</span>
+            <span>MILITARY</span>
+            <span>DEMOCRATIC</span>
           </div>
-        </div>
+          
+          <div className="scrubber-bar-track" onClick={handleScrubberAction}>
+            {/* Era Segments Background Glow */}
+            <div className="era-segment-bg" style={{ left: '0%', width: '27%', backgroundColor: '#b453091e' }}></div>
+            <div className="era-segment-bg" style={{ left: '27%', width: '13%', backgroundColor: '#0478571e' }}></div>
+            <div className="era-segment-bg" style={{ left: '40%', width: '33%', backgroundColor: '#4b55631e' }}></div>
+            <div className="era-segment-bg" style={{ left: '73%', width: '27%', backgroundColor: '#0284c71e' }}></div>
 
-        <div className="scrub-indicator-text">
-          <span>TRAVERSING SPATIAL HISTORICAL TIMELINE: {Math.round(1914 + (currentX / 575) * 112)} AD</span>
-        </div>
-      </footer>
+            {/* Scrubber Knob */}
+            <div
+              className="scrubber-knob"
+              style={{ left: `${(currentX / 575) * 100}%` }}
+            >
+              <div className="knob-pulse" style={{ backgroundColor: currentEra.color }}></div>
+            </div>
+          </div>
+
+          <div className="scrub-indicator-text">
+            <span>TRAVERSING SPATIAL HISTORICAL TIMELINE: {Math.round(1914 + (currentX / 575) * 112)} AD</span>
+          </div>
+        </footer>
+      )}
 
       {/* 4. ESCAPE / PAUSE OVERLAY MENU */}
       {isMenuOpen && (

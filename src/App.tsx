@@ -6,6 +6,7 @@ import { Timeline } from './components/Timeline';
 import { MuseumRoom } from './components/MuseumRoom';
 import { OverlayUI } from './components/OverlayUI';
 import { CinematicEffects } from './components/CinematicEffects';
+import { Gallery2D } from './components/Gallery2D';
 
 // Procedural Web Audio API Ambient Synthesizer
 // Synthesizes a warm space drone with modulating filters.
@@ -92,6 +93,7 @@ function App() {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
 
   // Camera and Timeline scroll states
   const [cameraMode, setCameraMode] = useState<CameraMode>('timeline');
@@ -274,10 +276,21 @@ function App() {
         onSetMenuOpen={setIsMenuOpen}
         isStarted={isStarted}
         onStart={handleStartExhibition}
+        viewMode={viewMode}
+        onToggleViewMode={setViewMode}
       />
 
-      {/* 2. 3D WEBGL ENGINE CANVAS */}
-      {isStarted && (
+      {/* 2. 2D GALLERY SYSTEM */}
+      {isStarted && viewMode === '2d' && (
+        <Gallery2D
+          activeLeader={activeLeader}
+          onSelectLeader={handleSelectLeader}
+          onExitRoom={handleExitRoom}
+        />
+      )}
+
+      {/* 3. 3D WEBGL ENGINE CANVAS */}
+      {isStarted && viewMode === '3d' && (
         <Canvas
           shadows={graphicsQuality !== 'low'}
           gl={{
