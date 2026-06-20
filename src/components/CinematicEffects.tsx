@@ -22,8 +22,10 @@ export const CinematicEffects: React.FC<CinematicEffectsProps> = ({
   cameraMode,
   targetX
 }) => {
-  const dofRef = useRef<{ bokehScale: number; focusDistance: number } | null>(null);
-  const chromaRef = useRef<{ offset: THREE.Vector2 } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dofRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chromaRef = useRef<any>(null);
 
   // Animate Depth of Field and Chromatic Aberration slightly if needed
   useFrame((state) => {
@@ -54,19 +56,15 @@ export const CinematicEffects: React.FC<CinematicEffectsProps> = ({
     return null;
   }
 
-  const isHigh = graphicsQuality === 'high';
-
-  return (
-    <EffectComposer disableNormalPass multisampling={isHigh ? 4 : 0}>
-      {/* @ts-expect-error - React 19 compatibility */}
-      <Bloom
-        luminanceThreshold={0.15}
-        luminanceSmoothing={0.9}
-        intensity={1.2}
-        mipmapBlur
-      />
-      {isHigh && (
-        /* @ts-expect-error - React 19 compatibility */
+  if (graphicsQuality === 'high') {
+    return (
+      <EffectComposer enableNormalPass={false} multisampling={4}>
+        <Bloom
+          luminanceThreshold={0.15}
+          luminanceSmoothing={0.9}
+          intensity={1.2}
+          mipmapBlur
+        />
         <DepthOfField
           ref={dofRef}
           target={[targetX, 0.2, -2.9]}
@@ -74,19 +72,29 @@ export const CinematicEffects: React.FC<CinematicEffectsProps> = ({
           bokehScale={2.0}
           height={480}
         />
-      )}
-      {isHigh && (
-        /* @ts-expect-error - React 19 compatibility */
         <ChromaticAberration
           ref={chromaRef}
           offset={new THREE.Vector2(0.0012, 0.0012)}
           radialModulation={false}
         />
-      )}
-      {/* @ts-expect-error - React 19 compatibility */}
+        <Noise opacity={0.02} premultiply />
+        <Vignette eskil={false} offset={0.3} darkness={0.55} />
+      </EffectComposer>
+    );
+  }
+
+  // Medium graphics preset (no DOF / Chromatic Aberration)
+  return (
+    <EffectComposer enableNormalPass={false} multisampling={0}>
+      <Bloom
+        luminanceThreshold={0.15}
+        luminanceSmoothing={0.9}
+        intensity={1.2}
+        mipmapBlur
+      />
       <Noise opacity={0.02} premultiply />
-      {/* @ts-expect-error - React 19 compatibility */}
       <Vignette eskil={false} offset={0.3} darkness={0.55} />
     </EffectComposer>
   );
 };
+

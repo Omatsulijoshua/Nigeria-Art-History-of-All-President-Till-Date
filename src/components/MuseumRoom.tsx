@@ -14,31 +14,33 @@ interface MuseumRoomProps {
   onExit: () => void;
 }
 
-// Global cache for procedural textures so they aren't regenerated per room
-const textureCache: Record<string, { map: THREE.Texture; normalMap?: THREE.Texture; roughnessMap?: THREE.Texture } | THREE.Texture> = {};
+// Separate global caches for procedural textures to ensure strict TypeScript return typing
+const stoneWallCache: Record<string, { map: THREE.Texture; normalMap: THREE.Texture }> = {};
+const marbleFloorCache: Record<string, { map: THREE.Texture; roughnessMap: THREE.Texture }> = {};
+const brassFrameCache: Record<string, { map: THREE.Texture; roughnessMap: THREE.Texture }> = {};
 
 function getStoneWallTextures() {
   const key = 'stone_wall_default';
-  if (!textureCache[key]) {
-    textureCache[key] = TextureGenerator.createStoneWall('#1c1a17', 512);
+  if (!stoneWallCache[key]) {
+    stoneWallCache[key] = TextureGenerator.createStoneWall('#1c1a17', 512);
   }
-  return textureCache[key];
+  return stoneWallCache[key];
 }
 
 function getMarbleFloorTextures(color: string) {
   const key = `marble_floor_${color}`;
-  if (!textureCache[key]) {
-    textureCache[key] = TextureGenerator.createMarbleFloor(color, 512);
+  if (!marbleFloorCache[key]) {
+    marbleFloorCache[key] = TextureGenerator.createMarbleFloor(color, 512);
   }
-  return textureCache[key];
+  return marbleFloorCache[key];
 }
 
 function getBrassFrameTextures() {
   const key = 'brass_frame_default';
-  if (!textureCache[key]) {
-    textureCache[key] = TextureGenerator.createBrassFrame(256);
+  if (!brassFrameCache[key]) {
+    brassFrameCache[key] = TextureGenerator.createBrassFrame(256);
   }
-  return textureCache[key];
+  return brassFrameCache[key];
 }
 
 // --- PORTRAIT LOADER ---
