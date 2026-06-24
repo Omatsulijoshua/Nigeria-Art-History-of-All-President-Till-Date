@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import type { Leader, EraId, LeaderWikiData } from '../types';
 import { LEADERS, ERAS } from '../data/leaders';
@@ -27,6 +28,7 @@ export const Gallery2D: React.FC<Gallery2DProps> = ({
   // Fetch Wikipedia data when activeLeader changes
   useEffect(() => {
     if (!activeLeader) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWikiData(null);
       return;
     }

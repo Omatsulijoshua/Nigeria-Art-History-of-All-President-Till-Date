@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import type { Leader, Era, GraphicsQuality } from '../types';
 import { LEADERS, ERAS } from '../data/leaders';
